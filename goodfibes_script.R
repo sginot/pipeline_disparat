@@ -32,7 +32,7 @@ un_structures <- unique(sl)
 # starting slice for each.
 #-------------------------------------------------------------------------------
 
-sq_thrs <- seq(from = 0.5, # Threshold values to explore can be modified here.
+sq_thrs <- seq(from = 0.3, # Threshold values to explore can be modified here.
                to = 0.9,   # Max range is from 0 to 1.
                by = 0.1)
 
@@ -50,14 +50,24 @@ for (i in 1:length(un_structures)) {
   sslice[i] <- mid_slice
   
   for (j in sq_thrs) {
+    #x11()
     thresholdPlot(images = f,
                   n = mid_slice,
                   threshold = j)
-    title(main = paste(un_structures[i], "Threshold =", j))}
+    title(main = paste(un_structures[i], "Threshold =", j))
+    }
   
   thrs[i] <- as.numeric(readline(prompt = "Input best threshold value: "))
-  dev.off()
+
+  while (dev.cur() > 1) dev.off()
 }
+
+write.table(rbind(un_structures, sslice, thrs), 
+            row.names = c("muscle", "mid_slice", "threshold"),
+            col.names = F,
+            file = "../parameters_goodfibes.csv",
+            sep = ",",
+            dec = ".")
 
 #-------------------------------------------------------------------------------
 # Run the goodfibes main functions automatically based on the values prepared
@@ -77,7 +87,7 @@ for (i in 1:length(un_structures)) {
   
   print(paste("Analyzing muscle:", un_structures[i]))
   
-  f <- list.files(pattern = un_structures[i])
+  f <- all_fil[which(sl == un_structures[i])]
   
   g <- good.fibes(images = f,
                   radius = 7,
@@ -96,22 +106,39 @@ for (i in 1:length(un_structures)) {
   
   ls <- list(fibers = g, lengths = fl, angles = fa)
   
-  ls_results[[i]] <- ls
+  save(ls,
+       file = paste("../", 
+                    un_structures[i], 
+                    "_goodfibes_output.RData", 
+                    sep = ""))
+  
+  #ls_results[[i]] <- ls
   
 }
 
-save(ls_results,
-     file = "../goodfibes_output.RData")
+#save(ls_results, file = "../goodfibes_output.RData")
 
 #-------------------------------------------------------------------------------
 # export fibes as surfaces
 #-------------------------------------------------------------------------------
 
-for (i in 1:length(un_structures)) {
+setwd("..")
+
+if (!dir.exists("./fibers_stl/")) {dir.create("./fibers_stl/")}
+
+rdata_files <- list.files(pattern = "_goodfibes_output.RData")  
+
+for (i in 1:length(rdata_files)) {
   
-  o <- ls_results[[i]][[1]]
+  load(rdata_files[i])
   
-  fil <- paste("../", un_structures[i], "_fibers.stl", sep = "")
+  o <- ls$fibers
+    
+  struct <- gsub(pattern = "_goodfibes_output.RData", 
+                 replacement = "",
+                 rdata_files[i])
+  
+  fil <- paste("./fibers_stl/", struct, "_fibers.stl", sep = "")
   
   muscle.plot.stl(fiber.list = o, 
                   res = resolution, 
