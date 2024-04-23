@@ -13,28 +13,37 @@ rm.last.chr <- function(x, n) {
 }
 
 #-------------------------------------------------------------------------------
-# Input working directory containing .png grayscale stacks of masked muscles
+# Input working directory containing .png grayscale stacks of masked muscles,
+# Define the sequence of threshold levels to be explored (range between 0 and 1)
+# Also set voxel size, number of fibers to be modeled and whether to show plots
+# (much slower)
 #-------------------------------------------------------------------------------
 
 WD <- readline(prompt = "Input working directory (without quotes): ")
 setwd(WD)
 
+sq_thrs <- seq(from = 0.3, # Threshold values to explore can be modified here.
+               to = 0.9,   # Max range is from 0 to 1.
+               by = 0.1)
+
+resolution <- as.numeric(readline(prompt = "Input voxel size: "))
+nfibers <- as.numeric(readline(prompt = "Input number of fibers to reconstruct: "))
+show.plot <- F
+
+
 #-------------------------------------------------------------------------------
 # File name manipulation
 #-------------------------------------------------------------------------------
 
-all_fil <- list.files()
-sl <- rm.last.chr(all_fil, 9)
-un_structures <- unique(sl)
+all_fil <- list.files() #list all files in folder
+sl <- rm.last.chr(all_fil, 9) #remove "_XXXX.png" at the end of file names
+usl <- unique(sl) #unique abbreviations of anatomical structures
+un_structures <- usl[-grep(pattern = "apo", usl)] #remove aponeuroses
 
 #-------------------------------------------------------------------------------
 # Loop through all muscles/segments to define the best threshold value and 
 # starting slice for each.
 #-------------------------------------------------------------------------------
-
-sq_thrs <- seq(from = 0.3, # Threshold values to explore can be modified here.
-               to = 0.9,   # Max range is from 0 to 1.
-               by = 0.1)
 
 sslice <- thrs <- rep(NA, length(un_structures))
 
@@ -74,14 +83,11 @@ write.table(rbind(un_structures, sslice, thrs),
 # in the previous section.
 #-------------------------------------------------------------------------------
 
-resolution <- as.numeric(readline(prompt = "Input voxel size: "))
-nfibers <- as.numeric(readline(prompt = "Input number of fibers to reconstruct: "))
-show.plot <- F
+#ls_results <- vector("list", length = length(un_structures))
 
-ls_results <- vector("list", 
-                     length = length(un_structures))
-
-names(ls_results) <- un_structures
+#names(ls_results) <- un_structures
+stm <- Sys.time()
+print(paste("Started:", stm))
 
 for (i in 1:length(un_structures)) {
   
@@ -101,10 +107,18 @@ for (i in 1:length(un_structures)) {
                       res = resolution, 
                       df = 2)
   
-  fa <- fiber.angle(fib.list = g, 
-                    axis = 1)
+  fax <- fiber.angle(fib.list = g, 
+                     axis = 1)
+  fay <- fiber.angle(fib.list = g, 
+                     axis = 2)
+  faz <- fiber.angle(fib.list = g, 
+                     axis = 3)
   
-  ls <- list(fibers = g, lengths = fl, angles = fa)
+  ls <- list(fibers = g, 
+             lengths = fl, 
+             x_angle = fax, 
+             y_angle = fay, 
+             z_angle = faz)
   
   save(ls,
        file = paste("../", 
@@ -115,6 +129,9 @@ for (i in 1:length(un_structures)) {
   #ls_results[[i]] <- ls
   
 }
+etm <- Sys.time()
+rtm <- difftime(etm, stm)
+print(paste("Runtime:", rtm))
 
 #save(ls_results, file = "../goodfibes_output.RData")
 
