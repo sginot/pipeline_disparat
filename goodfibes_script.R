@@ -30,7 +30,6 @@ resolution <- as.numeric(readline(prompt = "Input voxel size: "))
 nfibers <- as.numeric(readline(prompt = "Input number of fibers to reconstruct: "))
 show.plot <- F
 
-
 #-------------------------------------------------------------------------------
 # File name manipulation
 #-------------------------------------------------------------------------------
@@ -38,7 +37,11 @@ show.plot <- F
 all_fil <- list.files() #list all files in folder
 sl <- rm.last.chr(all_fil, 9) #remove "_XXXX.png" at the end of file names
 usl <- unique(sl) #unique abbreviations of anatomical structures
-un_structures <- usl[-grep(pattern = "apo", usl)] #remove aponeuroses
+un_structures <- usl
+
+if (length(grep(pattern = "apo", usl)) > 0) {
+  un_structures <- usl[-grep(pattern = "apo", usl)] #remove aponeuroses
+}
 
 #-------------------------------------------------------------------------------
 # Loop through all muscles/segments to define the best threshold value and 

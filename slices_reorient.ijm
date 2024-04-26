@@ -1,3 +1,7 @@
+//An image stack must already be opened in Fiji
+
+rename("original")
+
 //Create variables for dialog box 
 rows = 1;
 columns = 3;
@@ -43,45 +47,60 @@ for (i=0; i<n; i++) {
 
 //Reslicing from Coronal original slices
 if (orient[0] == 1 && neworient[0] == 1) {
+	selectImage("original");
 	print("Coronal > Coronal, nothing to do!");
 }
  
 if (orient[0] == 1 && neworient[1] == 1) {
+	selectImage("original");
 	print("Coronal > Sagittal, reslicing...");
-	run("Reslice [/]...", "output=1.000 start=Left rotate avoid");
+	run("Reslice [/]...", "output=1.000 start=Left avoid");
+	rename("sagittal");
 }
 
 if (orient[0] == 1 && neworient[2] == 1) {
+	selectImage("original");
 	print("Coronal > Transverse, reslicing...");
-	run("Reslice [/]...", "output=1.000 start=Top rotate avoid");
+	run("Reslice [/]...", "output=1.000 start=Top avoid");
+	rename("transverse");
 }
 
 //Reslicing from Sagittal original slices
 if (orient[1] == 1 && neworient[0] == 1) {
+	selectImage("original");
 	print("Sagittal > Coronal, reslicing...");
 	run("Reslice [/]...", "output=1.000 start=Left avoid");
+	rename("coronal");
 }
  
 if (orient[1] == 1 && neworient[1] == 1) {
+	selectImage("original");
 	print("Sagittal > Sagittal, nothing to do!");
 }
 
 if (orient[1] == 1 && neworient[2] == 1) {
+	selectImage("original");
 	print("Sagittal > Transverse, reslicing...");
 	run("Reslice [/]...", "output=1.000 start=Top avoid");
+	rename("transverse");
 }
 
 //Reslicing from Transverse original slices
 if (orient[2] == 1 && neworient[0] == 1) {
+	selectImage("original");
 	print("Transverse > Coronal, reslicing...");
 	run("Reslice [/]...", "output=1.000 start=Left avoid");
+	rename("coronal");
 }
  
 if (orient[2] == 1 && neworient[1] == 1) {
+	selectImage("original");
 	print("Transverse > Sagittal, reslicing...");
 	run("Reslice [/]...", "output=1.000 start=Top avoid");
+	rename("sagittal");
 }
 
 if (orient[2] == 1 && neworient[2] == 1) {
+	selectImage("original");
 	print("Transverse > Transverse, nothing to do!");
 }
