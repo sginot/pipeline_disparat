@@ -62,7 +62,7 @@ for (i in 1:length(un_structures)) {
   sslice[i] <- mid_slice
   
   for (j in sq_thrs) {
-    #x11()
+    x11()
     thresholdPlot(images = f,
                   n = mid_slice,
                   threshold = j)
